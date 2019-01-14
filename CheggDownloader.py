@@ -35,8 +35,7 @@ IMAGE_HEADERS = {
     'cache-control': "no-cache",
 }
 
-JAR = {c.name: c.value for c in cookies.chrome(domain_name='jigsaw.chegg.com')}
-
+JAR = {c.name: c.value for c in cookies.chrome(domain_name='chegg.com')}
 
 def prompt_login() -> None:
     choice = input(
@@ -195,6 +194,12 @@ def download_images(html: str, page: str,
                    max_retries: int, retry_delay: int) -> bool:
     soup = bs.BeautifulSoup(html, 'html.parser')
     images = [t['src'] for t in soup.find_all('img')]
+    #print(images)
+
+    # improve image quality
+    for i in range(0,len(images)):
+        images[i] = images[i][:-3]+"2000"
+
     result = True
     for offset, src in enumerate(images):
        name = page
@@ -211,6 +216,7 @@ def download_single(isbn: str, page: str,
     html = get_html(isbn, page, page, max_retries, retry_delay)
     soup = bs.BeautifulSoup(html, 'html.parser')
     images = [t['src'] for t in soup.find_all('img')]
+    #print(images)
     if images:
         if not get_image(images[0], get_filename(book_name, page, out_dir), out_dir, max_retries, retry_delay):
             return False
@@ -249,6 +255,7 @@ def download_range(isbn: str, start: int, end: int, interval: int,
         if not quiet:
             print("downloading page {:d}/{:d}".format(page, end))
         result = download_images(html, str(page), book_name, out_dir, max_retries, retry_delay)
+        #print(result)
         if not result:
             failed_pages.append(page + offset)
     end_time = time.time()
